@@ -1,0 +1,38 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Segredos: só o modelo vai para o repositório
+.env
+.env.*
+!.env.example
+
+# Caches de ferramentas
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.uv-cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Material de estudo pessoal (não faz parte do projeto)
+docs/estudos/
+
+# Editores e sistema operacional
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
