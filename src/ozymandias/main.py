@@ -6,6 +6,7 @@ class HealthResponse(BaseModel):
     status: str
     version: str
 
+
 app = FastAPI(
     title="Ozymandias API",
     version="0.1.0",
