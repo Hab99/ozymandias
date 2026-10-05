@@ -18,5 +18,5 @@ app = FastAPI(
     response_model=HealthResponse,
     tags=["Health"],
 )
-def health_check() -> HealthResponse:
+async def health_check() -> HealthResponse:
     return HealthResponse(status="ok", version="0.1.0")
