@@ -2,6 +2,7 @@
 stages:
   - qualidade
   - testes
+  - build
 
 # Variáveis disponíveis em todos os jobs
 variables:
@@ -37,3 +38,21 @@ testes:
   stage: testes
   script:
     - uv run pytest
+
+build:
+  stage: build
+  image: docker:29.6-cli            # só o comando docker (versão fixada)
+  services:
+    - docker:29.6-dind              # o motor do Docker, rodando ao lado do job
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"    # conexão segura (TLS) entre o job e o motor
+  before_script:
+    # login com a credencial temporária, sem a senha aparecer no log
+    - echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
+  script:
+    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -t "$CI_REGISTRY_IMAGE:latest" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+    - docker push "$CI_REGISTRY_IMAGE:latest"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH   # só na main
+    
