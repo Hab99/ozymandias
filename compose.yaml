@@ -1,15 +1,46 @@
 name: ozymandias # nome do projeto (sem isso, viraria "api", o nome da pasta)
 
 services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5434:5432" # 5434 no seu PC → 5432 no container
+    volumes:
+      - dados_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "8025:8025" # página da caixa de entrada
+      - "1025:1025" # SMTP: por onde a API envia
+
   api:
-    build: .   # constrói a imagem a partir do Dockerfile desta pasta
+    build: . # constrói a imagem a partir do Dockerfile desta pasta
     image: ozymandias-api # nome da imagem gerada
     ports:
       - "8000:8000" # porta do seu PC : porta do container
+    environment:
+      # dentro da rede do Compose, o banco se chama "db"
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    depends_on:
+      db:
+        condition: service_healthy
     healthcheck:
-    # a imagem slim não tem curl; o próprio Python faz a requisição
-      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/health')"]
+      # a imagem slim não tem curl; o próprio Python faz a requisição
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 10s # testa a cada 10 segundos
       timeout: 3s # cada teste pode levar até 3 segundos
       retries: 3 # 3 falhas seguidas = "unhealthy"
       start_period: 5s # tolerância enquanto a API inicia
+
+volumes:
+  dados_postgres:
