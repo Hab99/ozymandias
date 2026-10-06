@@ -23,8 +23,8 @@ wheels/
 .coverage.*
 htmlcov/
 
-# Material de estudo pessoal (não faz parte do projeto)
-docs/estudos/
+# Documentação de planejamento (mantida só localmente por enquanto)
+docs/
 
 # Editores e sistema operacional
 .idea/
