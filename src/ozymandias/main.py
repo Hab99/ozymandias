@@ -20,4 +20,4 @@ app = FastAPI(
     tags=["Health"],
 )
 async def health_check() -> HealthResponse:
-    return HealthResponse(status="ok", version="0.1.0")
+    return HealthResponse( status = "ok",version="0.1.0" )
