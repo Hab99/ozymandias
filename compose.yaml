@@ -1,0 +1,15 @@
+name: ozymandias # nome do projeto (sem isso, viraria "api", o nome da pasta)
+
+services:
+  api:
+    build: .   # constrói a imagem a partir do Dockerfile desta pasta
+    image: ozymandias-api # nome da imagem gerada
+    ports:
+      - "8000:8000" # porta do seu PC : porta do container
+    healthcheck:
+    # a imagem slim não tem curl; o próprio Python faz a requisição
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s # testa a cada 10 segundos
+      timeout: 3s # cada teste pode levar até 3 segundos
+      retries: 3 # 3 falhas seguidas = "unhealthy"
+      start_period: 5s # tolerância enquanto a API inicia

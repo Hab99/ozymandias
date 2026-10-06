@@ -1,0 +1,39 @@
+# Ordem das etapas: lint primeiro, testes depois
+stages:
+  - qualidade
+  - testes
+
+# Variáveis disponíveis em todos os jobs
+variables:
+  UV_VERSION: "0.12.10"          # mesma versão do seu PC e do Dockerfile
+  PYTHON_VERSION: "3.13"
+  BASE_LAYER: trixie-slim
+  UV_CACHE_DIR: .uv-cache        # pasta de cache dentro do projeto (o GitLab só cacheia dentro dele)
+  UV_LINK_MODE: copy             # necessário quando se usa cache (recomendação do uv)
+
+# Modelo reaproveitado pelos jobs (o ponto no nome = não roda sozinho)
+.uv:
+  image: ghcr.io/astral-sh/uv:$UV_VERSION-python$PYTHON_VERSION-$BASE_LAYER
+  cache:
+    - key:
+        files:
+          - uv.lock              # o cache só é refeito quando o uv.lock muda
+      paths:
+        - $UV_CACHE_DIR
+  before_script:
+    - uv sync --locked           # instala exatamente o lock; falha se ele estiver desatualizado
+  after_script:
+    - uv cache prune --ci        # enxuga o cache antes de salvar
+
+lint:
+  extends: .uv
+  stage: qualidade
+  script:
+    - uv run ruff check .
+    - uv run ruff format --check .
+
+testes:
+  extends: .uv
+  stage: testes
+  script:
+    - uv run pytest
